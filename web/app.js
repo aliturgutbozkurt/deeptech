@@ -30,6 +30,7 @@
   const sidebar = document.getElementById('sidebar');
   const collapseSidebarBtn = document.getElementById('collapseSidebarBtn');
   const toast = document.getElementById('toast');
+  const themeToggleBtn = document.getElementById('themeToggleBtn');
 
   // Initialization
   function init() {
@@ -56,10 +57,25 @@
     populateModalModules();
     setupEventListeners();
 
+    // Default theme is 'light'
+    const savedTheme = localStorage.getItem('deeptech_theme') || 'light';
+    applyTheme(savedTheme);
+
     // Parse initial URL hash
     parseHashAndLoad();
     renderNav();
     renderActiveLesson();
+  }
+
+  function applyTheme(theme) {
+    if (theme === 'dark') {
+      document.body.classList.add('theme-dark');
+      if (themeToggleBtn) themeToggleBtn.textContent = '🌙 Koyu';
+    } else {
+      document.body.classList.remove('theme-dark');
+      if (themeToggleBtn) themeToggleBtn.textContent = '☀️ Açık';
+    }
+    localStorage.setItem('deeptech_theme', theme);
   }
 
   // Parse URL hash (#lesson-42 or #lesson-042)
@@ -139,13 +155,23 @@
       renderNav();
     });
 
+    // Theme Toggle
+    if (themeToggleBtn) {
+      themeToggleBtn.addEventListener('click', () => {
+        const isDark = document.body.classList.contains('theme-dark');
+        applyTheme(isDark ? 'light' : 'dark');
+        showToast(isDark ? '☀️ Açık renk tema aktif' : '🌙 Koyu renk tema aktif');
+      });
+    }
+
     // Language Toggle
     langButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         langButtons.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentLang = btn.dataset.lang;
-        document.body.className = `lang-${currentLang}`;
+        document.body.classList.remove('lang-tr', 'lang-en', 'lang-both');
+        document.body.classList.add(`lang-${currentLang}`);
         showToast(`Dil modu: ${btn.textContent}`);
       });
     });
