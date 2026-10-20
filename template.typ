@@ -43,91 +43,95 @@
 }
 
 #let diagram_box(body) = {
-  v(4pt)
+  v(3pt)
   rect(
     width: 100%,
-    fill: rgb("030712"), // Deep Cosmic Black
-    stroke: (left: 4.5pt + rgb("06b6d4"), rest: 0.5pt + rgb("164e63")),
+    fill: rgb("f8fafc"), // Clean Slate
+    stroke: (left: 4.5pt + rgb("0284c7"), rest: 0.5pt + rgb("cbd5e1")),
     radius: (right: 6pt),
-    inset: (x: 11pt, y: 9pt),
+    inset: (x: 10pt, y: 8pt),
     [
       #grid(
         columns: (1fr, 1fr),
         gutter: 10pt,
-        [#text(weight: "bold", fill: rgb("22d3ee"), size: 9.5pt)[⚡ Derin Teknoloji & Fiziksel Süreç Şeması]],
-        [#align(right)[#text(weight: "bold", fill: rgb("67e8f9"), size: 9.5pt)[⚡ Frontier Physics & Architecture Schematic]]]
+        [#text(weight: "bold", fill: rgb("0369a1"), size: 9pt)[⚡ Derin Teknoloji & Fiziksel Süreç Şeması]],
+        [#align(right)[#text(weight: "bold", fill: rgb("0284c7"), size: 9pt)[⚡ Frontier Physics & Architecture Schematic]]]
       )
-      #v(3pt)
+      #v(2pt)
+      #show raw: set text(font: ("Menlo", "Courier New", "DejaVu Sans Mono"), size: 6.8pt, fill: rgb("0f172a"))
+      #show raw: set par(leading: 0.42em)
       #body
     ]
   )
-  v(4pt)
+  v(3pt)
 }
 
 #let eli5_box(body) = {
-  v(4pt)
+  v(3pt)
   rect(
     width: 100%,
     fill: rgb("eff6ff"), // Soft Blue
     stroke: (left: 4.5pt + rgb("2563eb"), rest: 0.5pt + rgb("bfdbfe")),
     radius: (right: 6pt),
-    inset: (x: 11pt, y: 9pt),
+    inset: (x: 10pt, y: 8pt),
     [
       #grid(
         columns: (1fr, 1fr),
         gutter: 10pt,
-        [#text(weight: "bold", fill: rgb("1e40af"), size: 9.5pt)[💡 Aptala Anlatım (ELI5 Metaforu)]],
-        [#align(right)[#text(weight: "bold", fill: rgb("1d4ed8"), size: 9.5pt)[💡 ELI5 Real-Life Metaphor]]]
+        [#text(weight: "bold", fill: rgb("1e40af"), size: 9pt)[💡 Aptala Anlatım (ELI5 Metaforu)]],
+        [#align(right)[#text(weight: "bold", fill: rgb("1d4ed8"), size: 9pt)[💡 ELI5 Real-Life Metaphor]]]
       )
-      #v(4pt)
+      #v(3pt)
       #body
     ]
   )
-  v(4pt)
+  v(3pt)
 }
 
 #let deep_dive_box(body) = {
-  v(4pt)
+  v(3pt)
   rect(
     width: 100%,
     fill: rgb("f8fafc"), // Slate
     stroke: (left: 4.5pt + rgb("7c3aed"), rest: 0.5pt + rgb("ddd6fe")),
     radius: (right: 6pt),
-    inset: (x: 11pt, y: 9pt),
+    inset: (x: 10pt, y: 8pt),
     [
       #grid(
         columns: (1fr, 1fr),
         gutter: 10pt,
-        [#text(weight: "bold", fill: rgb("5b21b6"), size: 9.5pt)[🔬 Deeptech & Mühendislik Seviyesi Teknik Derinlik]],
-        [#align(right)[#text(weight: "bold", fill: rgb("6d28d9"), size: 9.5pt)[🔬 Deeptech Engineering Deep-Dive]]]
+        [#text(weight: "bold", fill: rgb("5b21b6"), size: 9pt)[🔬 Deeptech & Mühendislik Seviyesi Teknik Derinlik]],
+        [#align(right)[#text(weight: "bold", fill: rgb("6d28d9"), size: 9pt)[🔬 Deeptech Engineering Deep-Dive]]]
       )
-      #v(4pt)
+      #v(3pt)
       #body
     ]
   )
-  v(4pt)
+  v(3pt)
 }
 
 #let code_box(body) = {
-  v(4pt)
+  v(3pt)
   rect(
     width: 100%,
-    fill: rgb("090514"), // Cosmic Dark Violet
-    stroke: (left: 4.5pt + rgb("a855f7"), rest: 0.5pt + rgb("3b0764")),
+    fill: rgb("faf5ff"), // Soft Violet
+    stroke: (left: 4.5pt + rgb("9333ea"), rest: 0.5pt + rgb("e9d5ff")),
     radius: (right: 6pt),
-    inset: (x: 11pt, y: 9pt),
+    inset: (x: 10pt, y: 8pt),
     [
       #grid(
         columns: (1fr, 1fr),
         gutter: 10pt,
-        [#text(weight: "bold", fill: rgb("c084fc"), size: 9.5pt)[💻 Uygulamalı Kod & Simülasyon (Python / Rust / Qiskit / CUDA)]],
-        [#align(right)[#text(weight: "bold", fill: rgb("d8b4fe"), size: 9.5pt)[💻 Applied Code & Simulation]]]
+        [#text(weight: "bold", fill: rgb("6b21a8"), size: 9pt)[💻 Uygulamalı Kod & Simülasyon (Python / Rust / Qiskit / CUDA)]],
+        [#align(right)[#text(weight: "bold", fill: rgb("7e22ce"), size: 9pt)[💻 Applied Code & Simulation]]]
       )
-      #v(4pt)
+      #v(2pt)
+      #show raw: set text(font: ("Menlo", "Courier New", "DejaVu Sans Mono"), size: 7.2pt)
+      #show raw: set par(leading: 0.45em)
       #body
     ]
   )
-  v(4pt)
+  v(3pt)
 }
 
 #let warning_box(body) = {
