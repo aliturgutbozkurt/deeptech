@@ -112,7 +112,7 @@
       parseHashAndLoad();
       updateActiveSidebarItem();
       renderActiveLesson();
-      contentViewport.scrollTo({ top: 0, behavior: 'instant' });
+      window.scrollTo({ top: 0, behavior: 'instant' });
     });
 
     // Search with debounce
@@ -165,11 +165,23 @@
       }
     });
 
-    // Collapse Sidebar
-    collapseSidebarBtn.addEventListener('click', () => {
+    // Toggle Sidebar Function
+    function toggleSidebar() {
       sidebar.classList.toggle('collapsed');
-      collapseSidebarBtn.textContent = sidebar.classList.contains('collapsed') ? '▶' : '◀';
-    });
+      document.body.classList.toggle('sidebar-collapsed');
+      if (collapseSidebarBtn) {
+        collapseSidebarBtn.textContent = sidebar.classList.contains('collapsed') ? '▶' : '◀';
+      }
+    }
+
+    if (collapseSidebarBtn) {
+      collapseSidebarBtn.addEventListener('click', toggleSidebar);
+    }
+
+    const navToggleSidebarBtn = document.getElementById('navToggleSidebarBtn');
+    if (navToggleSidebarBtn) {
+      navToggleSidebarBtn.addEventListener('click', toggleSidebar);
+    }
 
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
