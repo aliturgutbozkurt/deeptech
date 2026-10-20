@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aptala Anlatır Gibi Derin Teknolojiler (Deeptech Masterclass: 500 Lessons)</title>
+  <meta name="description" content="Kuantum, Yarı İletkenler, CRISPR, Nükleer Füzyon, Nöromorfik Çipler ve Robotik: 50 Bölüm, 500 Derslik Çift Dilli Deeptech Mühendislik Eğitimi.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="lang-both">
+  <!-- Top Bar -->
+  <header class="navbar">
+    <div class="nav-brand">
+      <div class="brand-icon">⚛️</div>
+      <div class="brand-text">
+        <h1 class="brand-title">Deeptech Masterclass</h1>
+        <p class="brand-subtitle">Aptala Anlatır Gibi Derin Teknolojiler • 500 Ders</p>
+      </div>
+    </div>
+
+    <div class="nav-search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Ders, teknoloji veya kavram ara (örn. Quantum, CRISPR, Fusion, CUDA, GAAFET)..." autocomplete="off">
+      <button id="clearSearchBtn" class="clear-search-btn" title="Aramayı Temizle">✕</button>
+    </div>
+
+    <div class="nav-actions">
+      <!-- Language Switcher -->
+      <div class="lang-switch-group" role="group" aria-label="Dil Seçimi">
+        <button class="lang-btn" data-lang="tr" title="Yalnızca Türkçe">🇹🇷 TR</button>
+        <button class="lang-btn active" data-lang="both" title="Çift Dilli / Bilingual">🌐 Çift Dilli</button>
+        <button class="lang-btn" data-lang="en" title="English Only">🇬🇧 EN</button>
+      </div>
+
+      <!-- PDF Library Trigger -->
+      <button id="openPdfModalBtn" class="btn btn-primary">
+        <span class="btn-icon">📥</span>
+        <span>PDF Kütüphanesi</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- App Layout -->
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="stats-badge">
+          <span class="stat-dot"></span>
+          <span id="statsLabel">50 Bölüm • 500 Ders</span>
+        </div>
+        <button id="collapseSidebarBtn" class="sidebar-collapse-btn" title="Menüyü Daralt">◀</button>
+      </div>
+
+      <div class="module-filter-bar">
+        <select id="moduleSelect" class="module-dropdown">
+          <option value="all">Tüm Bölümler (50 Bölüm)</option>
+        </select>
+      </div>
+
+      <nav class="lesson-nav" id="lessonNavList">
+        <!-- Injected via JavaScript -->
+      </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="content-viewport" id="contentViewport">
+      <!-- Empty state / Lesson viewer -->
+      <div id="lessonContainer" class="lesson-container">
+        <!-- Rendered active lesson -->
+      </div>
+    </main>
+  </div>
+
+  <!-- PDF Library Modal -->
+  <div id="pdfModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title">📚 Deeptech Masterclass PDF İndirme Merkezi</h2>
+          <p class="modal-subtitle">551 PDF: 1 Mega Kitap, 50 Bölüm Kitapçığı ve 500 Bireysel Ders PDF'i</p>
+        </div>
+        <button id="closePdfModalBtn" class="modal-close-btn">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Mega Book Card -->
+        <div class="mega-download-card">
+          <div class="mega-card-icon">📕</div>
+          <div class="mega-card-info">
+            <h3>Tek Parça Mega Kitap (500 Ders & 50 Bölüm Bir Arada)</h3>
+            <p>Tüm müfredatı içeren 500 derslik basıma ve dijital okumaya hazır devasa başvuru eseri.</p>
+            <span class="meta-tag">Deeptech_Masterclass_ELI5.pdf • 18.6 MB • 550+ Sayfa</span>
+          </div>
+          <a href="/output/book/Deeptech_Masterclass_ELI5.pdf" download class="btn btn-download-mega">
+            ⬇️ Mega Kitabı İndir (PDF)
+          </a>
+        </div>
+
+        <!-- 50 Module Downloads -->
+        <h4 class="modal-section-title">📦 Bölüm Kitapçıkları (50 Bölüm PDF)</h4>
+        <div class="modules-grid-download" id="modalModulesGrid">
+          <!-- Injected via JavaScript -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- Scripts -->
+  <script src="data/lessons.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
