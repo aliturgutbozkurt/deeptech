@@ -1,7 +1,6 @@
 /**
  * Deeptech Masterclass - Interactive Web Companion Application
- * Supports: 500 Lessons, 50 Modules, Live Instant Search, Bilingual TR/EN/Both toggle,
- * Modal PDF Library, Code copying, LocalStorage state.
+ * High-performance, reactive architecture for 500 lessons across 50 modules.
  */
 
 (function () {
@@ -10,6 +9,7 @@
   // State
   let allModules = [];
   let allLessons = [];
+  let lessonsByNum = new Map();
   let currentLessonNum = 1;
   let currentFilterModule = 'all';
   let currentSearchQuery = '';
@@ -21,6 +21,7 @@
   const moduleSelect = document.getElementById('moduleSelect');
   const lessonNavList = document.getElementById('lessonNavList');
   const lessonContainer = document.getElementById('lessonContainer');
+  const contentViewport = document.getElementById('contentViewport');
   const langButtons = document.querySelectorAll('.lang-btn');
   const openPdfModalBtn = document.getElementById('openPdfModalBtn');
   const closePdfModalBtn = document.getElementById('closePdfModalBtn');
@@ -34,11 +35,19 @@
   function init() {
     if (window.LESSONS_DATA && window.LESSONS_DATA.modules) {
       allModules = window.LESSONS_DATA.modules;
-      // Flatten lessons
       allLessons = [];
+      lessonsByNum.clear();
+
       allModules.forEach(m => {
         m.lessons.forEach(l => {
-          allLessons.push({ ...l, moduleId: m.id, moduleTitleTr: m.title_tr, moduleTitleEn: m.title_en });
+          const item = {
+            ...l,
+            moduleId: m.id,
+            moduleTitleTr: m.title_tr,
+            moduleTitleEn: m.title_en
+          };
+          allLessons.push(item);
+          lessonsByNum.set(l.num, item);
         });
       });
     }
@@ -47,17 +56,26 @@
     populateModalModules();
     setupEventListeners();
 
-    // Check URL Hash for deep linking (#lesson-42)
-    const hash = window.location.hash;
-    if (hash && hash.startsWith('#lesson-')) {
-      const num = parseInt(hash.replace('#lesson-', ''), 10);
-      if (num && num >= 1 && num <= allLessons.length) {
-        currentLessonNum = num;
-      }
-    }
-
+    // Parse initial URL hash
+    parseHashAndLoad();
     renderNav();
     renderActiveLesson();
+  }
+
+  // Parse URL hash (#lesson-42 or #lesson-042)
+  function parseHashAndLoad() {
+    const hash = window.location.hash;
+    if (hash) {
+      const match = hash.match(/#lesson[-_]?(\d+)/i);
+      if (match && match[1]) {
+        const num = parseInt(match[1], 10);
+        if (num >= 1 && num <= allLessons.length) {
+          currentLessonNum = num;
+          return;
+        }
+      }
+    }
+    currentLessonNum = 1;
   }
 
   // Populate Dropdown
@@ -77,10 +95,10 @@
       const paddedId = String(m.id).padStart(2, '0');
       const item = document.createElement('a');
       item.className = 'module-download-item';
-      item.href = `/output/modules/module_${paddedId}.pdf`;
+      item.href = `../output/modules/module_${paddedId}.pdf`;
       item.download = `Deeptech_Module_${paddedId}.pdf`;
       item.innerHTML = `
-        <div class="mod-dl-title">Bölüm ${m.id}: ${m.title_tr}</div>
+        <div class="mod-dl-title">Bölüm ${m.id}: ${escapeHtml(m.title_tr)}</div>
         <div class="mod-dl-badge">PDF ⬇</div>
       `;
       modalModulesGrid.appendChild(item);
@@ -89,11 +107,23 @@
 
   // Event Listeners
   function setupEventListeners() {
-    // Search
+    // Hash change event (native back/forward and anchor link navigation)
+    window.addEventListener('hashchange', () => {
+      parseHashAndLoad();
+      updateActiveSidebarItem();
+      renderActiveLesson();
+      contentViewport.scrollTo({ top: 0, behavior: 'instant' });
+    });
+
+    // Search with debounce
+    let searchTimeout;
     searchInput.addEventListener('input', (e) => {
-      currentSearchQuery = e.target.value.trim().toLowerCase();
-      clearSearchBtn.style.display = currentSearchQuery ? 'block' : 'none';
-      renderNav();
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        currentSearchQuery = e.target.value.trim().toLowerCase();
+        clearSearchBtn.style.display = currentSearchQuery ? 'block' : 'none';
+        renderNav();
+      }, 120);
     });
 
     clearSearchBtn.addEventListener('click', () => {
@@ -116,7 +146,7 @@
         btn.classList.add('active');
         currentLang = btn.dataset.lang;
         document.body.className = `lang-${currentLang}`;
-        showToast(`Dil değiştirildi: ${btn.textContent}`);
+        showToast(`Dil modu: ${btn.textContent}`);
       });
     });
 
@@ -145,6 +175,14 @@
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         pdfModal.classList.add('hidden');
+      } else if (e.key === 'ArrowRight' && !e.target.matches('input, textarea')) {
+        if (currentLessonNum < allLessons.length) {
+          window.location.hash = `#lesson-${currentLessonNum + 1}`;
+        }
+      } else if (e.key === 'ArrowLeft' && !e.target.matches('input, textarea')) {
+        if (currentLessonNum > 1) {
+          window.location.hash = `#lesson-${currentLessonNum - 1}`;
+        }
       }
     });
   }
@@ -152,21 +190,19 @@
   // Filter lessons
   function getFilteredLessons() {
     return allLessons.filter(l => {
-      // Module filter
       if (currentFilterModule !== 'all' && l.moduleId !== parseInt(currentFilterModule, 10)) {
         return false;
       }
-      // Search filter
       if (currentSearchQuery) {
-        const query = currentSearchQuery;
-        const inNum = String(l.num) === query;
-        const inTitleTr = l.title_tr.toLowerCase().includes(query);
-        const inTitleEn = l.title_en.toLowerCase().includes(query);
-        const inEli5Tr = l.eli5_tr.toLowerCase().includes(query);
-        const inEli5En = l.eli5_en.toLowerCase().includes(query);
-        const inDeepTr = l.deep_tr.toLowerCase().includes(query);
-        const inDeepEn = l.deep_en.toLowerCase().includes(query);
-        const inModule = l.moduleTitleTr.toLowerCase().includes(query) || l.moduleTitleEn.toLowerCase().includes(query);
+        const q = currentSearchQuery;
+        const inNum = String(l.num) === q;
+        const inTitleTr = l.title_tr.toLowerCase().includes(q);
+        const inTitleEn = l.title_en.toLowerCase().includes(q);
+        const inEli5Tr = l.eli5_tr.toLowerCase().includes(q);
+        const inEli5En = l.eli5_en.toLowerCase().includes(q);
+        const inDeepTr = l.deep_tr.toLowerCase().includes(q);
+        const inDeepEn = l.deep_en.toLowerCase().includes(q);
+        const inModule = l.moduleTitleTr.toLowerCase().includes(q) || l.moduleTitleEn.toLowerCase().includes(q);
         return inNum || inTitleTr || inTitleEn || inEli5Tr || inEli5En || inDeepTr || inDeepEn || inModule;
       }
       return true;
@@ -187,56 +223,67 @@
       return;
     }
 
-    // Group filtered lessons by module
-    const grouped = {};
+    // Group by module
+    const grouped = new Map();
     filtered.forEach(l => {
-      if (!grouped[l.moduleId]) {
-        grouped[l.moduleId] = [];
+      if (!grouped.has(l.moduleId)) {
+        grouped.set(l.moduleId, []);
       }
-      grouped[l.moduleId].push(l);
+      grouped.get(l.moduleId).push(l);
     });
 
-    Object.keys(grouped).forEach(modId => {
-      const lessons = grouped[modId];
-      const mod = allModules.find(m => m.id === parseInt(modId, 10));
-      
+    const frag = document.createDocumentFragment();
+
+    grouped.forEach((lessons, modId) => {
+      const mod = allModules.find(m => m.id === modId);
+      if (!mod) return;
+
       const groupDiv = document.createElement('div');
       groupDiv.className = 'nav-module-group';
 
       const titleDiv = document.createElement('div');
       titleDiv.className = 'nav-module-title';
       titleDiv.innerHTML = `
-        <span>Bölüm ${mod.id}: ${mod.title_tr}</span>
+        <span>Bölüm ${mod.id}: ${escapeHtml(mod.title_tr)}</span>
         <span style="opacity: 0.6; font-size: 10px;">${lessons.length} ders</span>
       `;
       groupDiv.appendChild(titleDiv);
 
       lessons.forEach(l => {
-        const item = document.createElement('div');
+        const item = document.createElement('a');
+        item.href = `#lesson-${l.num}`;
         item.className = `nav-lesson-item ${l.num === currentLessonNum ? 'active' : ''}`;
+        item.setAttribute('data-lesson-num', l.num);
         item.innerHTML = `
           <span class="nav-lesson-num">#${l.num}</span>
-          <div class="nav-lesson-text">
-            ${l.title_tr}
-          </div>
+          <div class="nav-lesson-text">${escapeHtml(l.title_tr)}</div>
         `;
-        item.addEventListener('click', () => {
-          currentLessonNum = l.num;
-          window.location.hash = `#lesson-${l.num}`;
-          renderNav();
-          renderActiveLesson();
-          document.getElementById('contentViewport').scrollTo({ top: 0, behavior: 'smooth' });
-        });
         groupDiv.appendChild(item);
       });
 
-      lessonNavList.appendChild(groupDiv);
+      frag.appendChild(groupDiv);
     });
+
+    lessonNavList.appendChild(frag);
+    updateActiveSidebarItem();
+  }
+
+  // Efficient active item update without DOM re-render
+  function updateActiveSidebarItem() {
+    const prev = lessonNavList.querySelector('.nav-lesson-item.active');
+    if (prev) {
+      prev.classList.remove('active');
+    }
+    const current = lessonNavList.querySelector(`.nav-lesson-item[data-lesson-num="${currentLessonNum}"]`);
+    if (current) {
+      current.classList.add('active');
+      current.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
   }
 
   // Render Active Lesson in Main Viewport
   function renderActiveLesson() {
-    const lesson = allLessons.find(l => l.num === currentLessonNum);
+    const lesson = lessonsByNum.get(currentLessonNum);
     if (!lesson) return;
 
     const paddedNum = String(lesson.num).padStart(3, '0');
@@ -267,10 +314,10 @@
         <div class="lesson-title-en col-en">${escapeHtml(lesson.title_en)}</div>
 
         <div class="lesson-header-actions">
-          <a href="/output/individual/lesson_${paddedNum}.pdf" download="Deeptech_Lesson_${paddedNum}.pdf" class="btn btn-subtle">
+          <a href="../output/individual/lesson_${paddedNum}.pdf" download="Deeptech_Lesson_${paddedNum}.pdf" class="btn btn-subtle">
             📄 Bu Dersin PDF'ini İndir
           </a>
-          <a href="/output/modules/module_${paddedMod}.pdf" download="Deeptech_Module_${paddedMod}.pdf" class="btn btn-subtle">
+          <a href="../output/modules/module_${paddedMod}.pdf" download="Deeptech_Module_${paddedMod}.pdf" class="btn btn-subtle">
             📦 Bölüm Kitapçığını İndir
           </a>
         </div>
@@ -382,42 +429,23 @@
 
       <!-- Footer Navigation Buttons -->
       <div class="lesson-footer-nav">
-        <button id="prevLessonBtn" class="btn btn-subtle" ${lesson.num <= 1 ? 'disabled style="opacity: 0.4; cursor: not-allowed;"' : ''}>
-          ◀ Önceki Ders (#${lesson.num > 1 ? lesson.num - 1 : 1})
-        </button>
-        <span style="font-size: 13px; color: var(--text-dim);">Ders ${lesson.num} / 500</span>
-        <button id="nextLessonBtn" class="btn btn-primary" ${lesson.num >= 500 ? 'disabled style="opacity: 0.4; cursor: not-allowed;"' : ''}>
-          Sonraki Ders (#${lesson.num < 500 ? lesson.num + 1 : 500}) ▶
-        </button>
+        ${lesson.num > 1 
+          ? `<a href="#lesson-${lesson.num - 1}" class="btn btn-subtle">◀ Önceki Ders (#${lesson.num - 1})</a>` 
+          : `<span class="btn btn-subtle" style="opacity: 0.4; cursor: not-allowed;">◀ İlk Ders</span>`}
+        <span style="font-size: 13px; color: var(--text-dim);">Ders ${lesson.num} / ${allLessons.length}</span>
+        ${lesson.num < allLessons.length 
+          ? `<a href="#lesson-${lesson.num + 1}" class="btn btn-primary">Sonraki Ders (#${lesson.num + 1}) ▶</a>` 
+          : `<span class="btn btn-primary" style="opacity: 0.4; cursor: not-allowed;">Son Ders ▶</span>`}
       </div>
     `;
 
-    // Bind dynamic buttons
-    document.getElementById('copyCodeBtn').addEventListener('click', () => {
-      navigator.clipboard.writeText(lesson.code).then(() => {
-        showToast('Kod panoya kopyalandı! 📋');
-      });
-    });
-
-    const prevBtn = document.getElementById('prevLessonBtn');
-    if (prevBtn && lesson.num > 1) {
-      prevBtn.addEventListener('click', () => {
-        currentLessonNum--;
-        window.location.hash = `#lesson-${currentLessonNum}`;
-        renderNav();
-        renderActiveLesson();
-        document.getElementById('contentViewport').scrollTo({ top: 0, behavior: 'smooth' });
-      });
-    }
-
-    const nextBtn = document.getElementById('nextLessonBtn');
-    if (nextBtn && lesson.num < 500) {
-      nextBtn.addEventListener('click', () => {
-        currentLessonNum++;
-        window.location.hash = `#lesson-${currentLessonNum}`;
-        renderNav();
-        renderActiveLesson();
-        document.getElementById('contentViewport').scrollTo({ top: 0, behavior: 'smooth' });
+    // Bind copy button
+    const copyBtn = document.getElementById('copyCodeBtn');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(lesson.code).then(() => {
+          showToast('Kod panoya kopyalandı! 📋');
+        });
       });
     }
   }
@@ -443,5 +471,9 @@
   }
 
   // Start app
-  window.addEventListener('DOMContentLoaded', init);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();
